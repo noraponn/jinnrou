@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>人狼</title>
+  <link rel="icon" href="img/favcon.jpg">
+  <style>
+    .invisible {
+      display: none;
+    }
+
+    body {
+      margin: 0;
+    }
+
+    h1 {
+      font-weight: normal;
+      text-align: center;
+    }
+
+    #list,
+    #checked {
+      text-align: center;
+    }
+
+
+
+    button {
+      display: block;
+      margin: 0 auto;
+    }
+
+    div {
+      text-align: center;
+    }
+
+    ul {
+      list-style: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="start">
+    <h1>ワンナイト人狼</h1>
+    <p id="list">
+      <img src="img/card_c1.png" alt="" width="75" height="107" id="murabito">
+      <img src="img/card_c2.png" alt="" width="75" height="107" id="uranaisi">
+      <img src="img/card_c3.png" alt="" width="75" height="107" id="kaitou">
+      <img src="img/card_c4.png" alt="" width="75" height="107" id="jinnrou">
+      <img src="img/card_c5.png" alt="" width="75" height="107" id="kyoujinn">
+      <img src="img/card_c6.png" alt="" width="75" height="107" id="teruteru">
+    </p>
+    <p id="checked"></p>
+    <button id="btn0">ゲーム開始</button>
+  </div>
+
+  <div id="peopleConfirmation" class="invisible">
+    <p id="peopleMessage"></p>
+    <button id="btn2">役を確認する</button>
+  </div>
+  <div id="jobConfirmation" class="invisible">
+    <p id="jobMessage">
+    <p id="jobContent"></p>
+    </p>
+    <button id="btn3">次の人へ</button>
+  </div>
+  <div class="invisible" id="detective">
+    <p>始めてください</p>
+    <button id="btn4">終了</button>
+  </div>
+
+  <div id="result" class="invisible">
+    <p>結果</p>
+    <ul id="resultList">
+
+    </ul>
+  </div>
+
+
+  <script>
+    "use strict";
+
+    {
+
+      const list = document.getElementById("list");
+
+      const murabito = document.getElementById("murabito");
+      const uranaisi = document.getElementById('uranaisi');
+      const kaitou = document.getElementById('kaitou');
+      const jinnrou = document.getElementById("jinnrou");
+      const kyoujinn = document.getElementById("kyoujinn");
+      const teruteru = document.getElementById("teruteru");
+
+      const checked = document.getElementById("checked");
+      const btn = document.querySelector("#btn0");
+
+      const peopleConfirmation = document.getElementById("peopleConfirmation")
+      const jobConfirmation = document.getElementById("jobConfirmation");
+
+      const jobContent = document.getElementById("jobContent");
+
+      const detective = document.getElementById("detective")
+
+      const result = document.getElementById("result");
+
+
+
+      let jobList;
+      const jobNameList = [];
+      let newJobList;
+      let newJobNameList;
+      let playerNumber = 1;
+      const jinnrouList = [];
+      const peopleMessage = document.getElementById("peopleMessage");
+
+
+
+
+
+      // 使われるものはclassにusedを追加する
+      list.addEventListener('click', e => {
+        const target = e.target.cloneNode(false);
+        target.classList.add("used")
+        checked.appendChild(target);
+      });
+      // ボタンが押されたらゲームを始める
+      btn.addEventListener("click", ゲーム開始);
+
+      function ゲーム開始() {
+        document.getElementById("start").classList.add("invisible");
+        jobList = シャッフル(document.querySelectorAll(".used"));
+        console.log(jobList);
+        document.getElementById("peopleConfirmation").classList.remove("invisible");
+        peopleMessage.textContent = `${playerNumber}ですか？`;
+        for (let i = 0; i < jobList.length; i++) {
+          jobNameList.push(jobList[i].id);
+        }
+        console.log(jobNameList);
+        for (let i = 0; i < jobList.length - 2; i++) {
+          if (jobNameList[i] === "jinnrou") {
+            jinnrouList.push(i + 1);
+          }
+        }
+        console.log(jinnrouList);
+        newJobList = [...jobList];
+        newJobNameList = [...jobNameList];
+
+      }
+
+
+
+      function シャッフル(list) {
+        const oldList = [...list];
+        const newList = [];
+        const listLength = list.length;
+
+        for (let x = 0; x < listLength; x++) {
+          let randomNumber = サイコロ(listLength - x);
+          newList.push(oldList[randomNumber]);
+          // console.log(listLength);
+          // console.log(randomNumber);
+          // console.log(oldList);
+          // console.log(newList);
+          oldList.splice(randomNumber, 1);
+        }
+
+        return newList;
+      }
+
+      // 0から数字未満のランダムな数字を返す
+      function サイコロ(数字) {
+        return Math.floor(Math.random() * 数字);
+      }
+
+
+      document.querySelector("#btn2").addEventListener("click", () => {
+        jobContent.textContent = "";
+        peopleConfirmation.classList.add("invisible");
+        jobConfirmation.classList.remove("invisible");
+
+        document.getElementById("jobMessage").appendChild(jobList[playerNumber - 1])
+
+        console.log(document.getElementById("jobMessage").childNodes)
+
+        if (jobList[playerNumber - 1].id === "jinnrou") {
+          //人狼の名前を表示
+          jobContent.textContent = `${(jinnrouList)}playerが人狼です`;
+        }
+        //占い師の時の動き
+        else if (jobList[playerNumber - 1].id === "uranaisi") {
+          let ul = document.createElement("ul");
+          for (let i = 0; i < jobList.length - 2; i++) {
+            let li = document.createElement("li");
+            li.textContent = `${i + 1}player`;
+            li.addEventListener("click", () => {
+              ul.remove();
+              jobContent.textContent = `${i + 1}playerは${jobNameList[i]}です`;
+
+            });
+            ul.appendChild(li);
+          }
+          let li = document.createElement("li");
+          li.textContent = "墓地";
+          li.addEventListener("click", () => {
+            ul.remove();
+            jobContent.textContent = `墓地は${jobNameList[jobNameList.length - 2]}と${jobNameList[jobNameList.length - 1]}です`;
+          })
+          ul.appendChild(li);
+          jobContent.appendChild(ul);
+
+        }
+        //怪盗の時の動き
+        else if (jobList[playerNumber - 1].id === "kaitou") {
+          let target;
+          let targetName;
+          let ul = document.createElement("ul");
+          for (let i = 0; i < jobList.length - 2; i++) {
+            let li = document.createElement("li");
+            li.textContent = `${i + 1}player`;
+            li.addEventListener("click", () => {
+              ul.remove();
+              jobContent.textContent = `${i + 1}playerの${jobNameList[i]}といれ変えます`;
+              target = jobList[i];
+              targetName = jobNameList[i];
+              newJobList[i] = jobList[playerNumber - 1];
+              newJobList[playerNumber - 1] = target;
+              newJobNameList[i] = jobNameList[playerNumber - 1];
+              newJobNameList[playerNumber - 1] = targetName;
+              console.log(jobNameList);
+              console.log(newJobNameList);
+
+
+            });
+            ul.appendChild(li);
+          }
+          jobContent.appendChild(ul);
+
+
+        }
+        else {
+          jobContent.textContent = ``;
+        }
+      })
+
+      document.querySelector("#btn3").addEventListener("click", () => {
+        jobConfirmation.classList.add("invisible");
+
+        if (jobList.length - playerNumber === 2) {
+          detective.classList.remove("invisible");
+        }
+        else {
+          peopleConfirmation.classList.remove("invisible");
+
+
+          document.getElementById("jobMessage").removeChild(document.getElementById("jobMessage").firstElementChild);
+          playerNumber++
+          peopleMessage.textContent = `${playerNumber}ですか？`;
+
+        }
+
+      })
+
+
+
+      document.querySelector("#btn4").addEventListener("click", () => {
+        detective.classList.add("invisible");
+        result.classList.remove("invisible");
+
+        for (let i = 0; i < newJobList.length - 2; i++) {
+          let li = document.createElement("li");
+          let p = document.createElement("p");
+          p.textContent = `${i + 1}player`;
+          li.appendChild(p);
+          li.appendChild(newJobList[i]);
+          document.getElementById("resultList").appendChild(li);
+        }
+      })
+    }
+
+
+
+
+
+  </script>
+</body>
+
+</html>
